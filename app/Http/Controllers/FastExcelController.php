@@ -23,7 +23,10 @@ class FastExcelController extends Controller
             $today_date_time = Carbon::now()->format('Y-m-d H:i:s');
             $row_number = 2;
             $errors = [];
-            $rows = (new FastExcel)->import($request->file('file'));
+            $filePath = $request->file('file')->path();
+            $newFilePath =  $filePath . '.' . $request->file('file')->getClientOriginalExtension();
+            move_uploaded_file($filePath, $newFilePath);
+            $rows = (new FastExcel)->import($newFilePath);
             foreach($rows as $row) {
                 if(!$row['Business Category'] || !$row['Product Category']) {
                     $errors[$row_number] = [
