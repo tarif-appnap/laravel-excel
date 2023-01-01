@@ -47,7 +47,7 @@
                 </div>
 
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
-                    <form action="{{ route('excel.import') }}" method="post" enctype="multipart/form-data">
+                    <form action="{{ route('fast-excel.import') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
                             <input type="file" class="form-control" name="file" required>
