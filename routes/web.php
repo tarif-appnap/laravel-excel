@@ -19,5 +19,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/php-info', function () {
+    echo phpinfo();
+});
+
 Route::post('/laravel-excel-import', [ExcelToCategoryImportController::class, 'import'])->name('excel.import');
 Route::post('/fast-excel-import', [FastExcelController::class, 'import'])->name('fast-excel.import');

@@ -6,6 +6,7 @@ use App\Models\BusinessCategory;
 use App\Models\ProductCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Rap2hpoutre\FastExcel\FastExcel;
 
 class FastExcelController extends Controller
@@ -23,13 +24,8 @@ class FastExcelController extends Controller
             $today_date_time = Carbon::now()->format('Y-m-d H:i:s');
             $row_number = 2;
             $errors = [];
-            $directory = storage_path("public/excels");
-            !file_exists($directory) && mkdir($directory, 0777, true);
-            $extension = $request->file('file')->getClientOriginalExtension();
-            $fileNameToStore = time().'.'.$extension;
-            $path = $request->file('file')->storeAs('public/excels', $fileNameToStore);
-            $uploaded_path = storage_path().'/app/'.$path;
-            $rows = (new FastExcel)->import($uploaded_path);
+            $path = $request->file('file')->store('excels');
+            $rows = (new FastExcel)->import(Storage::disk('public')->path($path));
             foreach($rows as $row) {
                 if(!$row['Business Category'] || !$row['Product Category']) {
                     $errors[$row_number] = [
@@ -60,12 +56,19 @@ class FastExcelController extends Controller
                 $row_number++;
             }
             if(count($errors)) {
-                dd($errors);
                 return false;
             }
-            if(count($new_business_categories)) BusinessCategory::insert($new_business_categories);
-            if(count($new_product_categories)) ProductCategory::insert($new_product_categories);
-            return back();
+            if(count($new_business_categories)) {
+                foreach (array_chunk($new_business_categories, 1000) as $data) {
+                    BusinessCategory::query()->insert($data);
+                }
+            }
+            if(count($new_product_categories)) {
+                foreach (array_chunk($new_product_categories, 1000) as $data) {
+                    ProductCategory::query()->insert($data);
+                }
+            }
+            dd('ok');
         }
     }
 }
